@@ -17,11 +17,51 @@ export function useFlashcards() {
     currentCardIndex: 0,
     isFlipped: false,
     currentMode: 'text',
-    flashcards: defaultFlashcards
+    flashcards: []
   });
   
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Fetch flashcards from JSON file
+  useEffect(() => {
+    const loadFlashcards = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/data/flashcards.json');
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch flashcards: ${response.status}`);
+        }
+        
+        const data: Flashcard[] = await response.json();
+        
+        if (!Array.isArray(data) || data.length === 0) {
+          throw new Error('Invalid flashcard data format');
+        }
+        
+        setGameState(prev => ({
+          ...prev,
+          flashcards: data
+        }));
+        
+        setError(null);
+      } catch (err) {
+        console.error('Error loading flashcards:', err);
+        setError(err instanceof Error ? err.message : 'Unknown error');
+        
+        // Fall back to default flashcards
+        setGameState(prev => ({
+          ...prev,
+          flashcards: defaultFlashcards
+        }));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadFlashcards();
+  }, []);
 
   const flipCard = () => {
     setGameState(prev => ({ ...prev, isFlipped: !prev.isFlipped }));
