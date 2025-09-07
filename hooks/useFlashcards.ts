@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Flashcard, GameState, AnswerMode } from '@/types/flashcard';
 
 const defaultFlashcards: Flashcard[] = [
@@ -20,8 +20,69 @@ export function useFlashcards() {
     flashcards: []
   });
   
+  const [originalFlashcards, setOriginalFlashcards] = useState<Flashcard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [generatingVariation, setGeneratingVariation] = useState(false);
+  const [generatedIndices, setGeneratedIndices] = useState<Set<number>>(new Set());
+
+  // Generate variation function
+  const generateVariation = useCallback(async (forceRegenerate = false) => {
+    const currentIndex = gameState.currentCardIndex;
+    const originalCard = originalFlashcards[currentIndex];
+    
+    // Skip if already generated for this index (unless forced)
+    if (!forceRegenerate && generatedIndices.has(currentIndex)) {
+      console.log('Variation already generated for index:', currentIndex);
+      return;
+    }
+    
+    if (!originalCard || generatingVariation) return;
+    
+    console.log('Requesting variation for card:', originalCard.problem_title);
+
+    try {
+      setGeneratingVariation(true);
+      setError(null);
+      
+      const response = await fetch('/api/generate-variation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(originalCard),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(`Failed to generate variation: ${errorData}`);
+      }
+
+      const variation: Flashcard = await response.json();
+      
+      console.log('Received variation:', variation.problem_title);
+      
+      // Replace the current card with the variation
+      setGameState(prev => {
+        const newFlashcards = [...prev.flashcards];
+        newFlashcards[currentIndex] = variation;
+        return {
+          ...prev,
+          flashcards: newFlashcards,
+          isFlipped: false,
+        };
+      });
+      
+      // Mark this index as having a generated variation
+      setGeneratedIndices(prev => new Set(prev).add(currentIndex));
+      
+    } catch (err) {
+      console.error('Error generating variation:', err);
+      setError(err instanceof Error ? err.message : 'Failed to generate variation');
+    } finally {
+      setGeneratingVariation(false);
+    }
+  }, [gameState.currentCardIndex, originalFlashcards, generatingVariation, generatedIndices]);
 
   // Fetch flashcards from JSON file
   useEffect(() => {
@@ -40,9 +101,11 @@ export function useFlashcards() {
           throw new Error('Invalid flashcard data format');
         }
         
+        // Store both original and working copies
+        setOriginalFlashcards(data);
         setGameState(prev => ({
           ...prev,
-          flashcards: data
+          flashcards: [...data]  // Create a copy
         }));
         
         setError(null);
@@ -51,9 +114,10 @@ export function useFlashcards() {
         setError(err instanceof Error ? err.message : 'Unknown error');
         
         // Fall back to default flashcards
+        setOriginalFlashcards(defaultFlashcards);
         setGameState(prev => ({
           ...prev,
-          flashcards: defaultFlashcards
+          flashcards: [...defaultFlashcards]
         }));
       } finally {
         setLoading(false);
@@ -62,6 +126,22 @@ export function useFlashcards() {
 
     loadFlashcards();
   }, []);
+
+  // Generate variation for the first card when flashcards are loaded
+  useEffect(() => {
+    if (!loading && originalFlashcards.length > 0 && !generatingVariation) {
+      console.log('Generating initial variation...');
+      generateVariation();
+    }
+  }, [loading, originalFlashcards.length]); // Intentionally not including generateVariation to avoid loops
+
+  // Generate variation when currentCardIndex changes
+  useEffect(() => {
+    if (!loading && originalFlashcards.length > 0 && !generatingVariation) {
+      console.log('Card index changed, generating variation...');
+      generateVariation();
+    }
+  }, [gameState.currentCardIndex]); // Intentionally not including generateVariation to avoid loops
 
   const flipCard = () => {
     setGameState(prev => ({ ...prev, isFlipped: !prev.isFlipped }));
@@ -74,6 +154,7 @@ export function useFlashcards() {
         currentCardIndex: prev.currentCardIndex + 1,
         isFlipped: false
       }));
+      // Variation will be generated automatically by the useEffect
     }
   };
 
@@ -84,6 +165,33 @@ export function useFlashcards() {
         currentCardIndex: prev.currentCardIndex - 1,
         isFlipped: false
       }));
+      // Variation will be generated automatically by the useEffect
+    }
+  };
+
+  const regenerateVariation = () => {
+    // Force regenerate even if already generated
+    generateVariation(true);
+  };
+
+  const resetToOriginal = () => {
+    const originalCard = originalFlashcards[gameState.currentCardIndex];
+    if (originalCard) {
+      setGameState(prev => {
+        const newFlashcards = [...prev.flashcards];
+        newFlashcards[prev.currentCardIndex] = { ...originalCard };
+        return {
+          ...prev,
+          flashcards: newFlashcards,
+          isFlipped: false,
+        };
+      });
+      // Remove from generated set so it can be regenerated
+      setGeneratedIndices(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(gameState.currentCardIndex);
+        return newSet;
+      });
     }
   };
 
@@ -98,10 +206,13 @@ export function useFlashcards() {
     currentCard,
     loading,
     error,
+    generatingVariation,
     flipCard,
     nextCard,
     prevCard,
     setMode,
+    generateVariation: regenerateVariation, // Use regenerateVariation for manual trigger
+    resetToOriginal,
     canGoNext: gameState.currentCardIndex < gameState.flashcards.length - 1,
     canGoPrev: gameState.currentCardIndex > 0,
   };

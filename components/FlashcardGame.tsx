@@ -19,6 +19,8 @@ export default function FlashcardGame() {
     nextCard,
     prevCard,
     setMode,
+    generateVariation,  // Make sure this is destructured
+    generatingVariation, // And this
     canGoNext,
     canGoPrev,
   } = useFlashcards();
@@ -59,9 +61,8 @@ export default function FlashcardGame() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 to-blue-600">
         <div className="text-white text-center">
-          <div className="text-xl mb-4">Error loading flashcards</div>
-          <div className="text-sm opacity-75">{error}</div>
-          <div className="text-sm mt-2">Using default flashcards instead</div>
+          <div className="text-xl mb-4">Error: {error}</div>
+          <div className="text-sm opacity-75">Check console for details</div>
         </div>
       </div>
     );
@@ -103,6 +104,8 @@ export default function FlashcardGame() {
             canGoPrev={canGoPrev}
             onNext={nextCard}
             onPrev={prevCard}
+            onGenerateVariation={generateVariation}  // Pass the function
+            generatingVariation={generatingVariation} // Pass the loading state
           />
         </div>
       </div>
