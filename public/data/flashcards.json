@@ -1,0 +1,122 @@
+[
+  {
+    "problem_title": "FizzBuzz",
+    "problem_description": "Write a program that prints the numbers from 1 to 100. But for multiples of three, print \"Fizz\" instead of the number, and for the multiples of five, print \"Buzz\". For numbers which are multiples of both three and five, print \"FizzBuzz\".",
+    "code_solution": "def fizzbuzz():\n    for i in range(1, 101):\n        if i % 3 == 0 and i % 5 == 0:\n            print(\"FizzBuzz\")\n        elif i % 3 == 0:\n            print(\"Fizz\")\n        elif i % 5 == 0:\n            print(\"Buzz\")\n        else:\n            print(i)",
+    "code_explanation": "This solution iterates through numbers 1 to 100. It checks if the number is divisible by both 3 and 5 first (using the modulo operator `%`), then if it's divisible by 3, then by 5. If none of these conditions are met, it prints the number itself."
+  },
+  {
+    "problem_title": "Two Sum",
+    "problem_description": "Given an array of integers `nums` and an integer `target`, return indices of the two numbers in the array such that they add up to `target`.",
+    "code_solution": "def two_sum(nums, target):\n    num_dict = {}\n    for i, num in enumerate(nums):\n        complement = target - num\n        if complement in num_dict:\n            return [num_dict[complement], i]\n        num_dict[num] = i\n    return []",
+    "code_explanation": "This solution uses a hash table (dictionary in Python) to store each number and its index. For each number, we calculate its complement (target - number) and check if this complement exists in our dictionary. If it does, we've found our pair and return their indices. If not, we add the current number and its index to the dictionary."
+  },
+  {
+    "problem_title": "Valid Parentheses",
+    "problem_description": "Given a string `s` containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid. An input string is valid if: 1. Open brackets must be closed by the same type of brackets. 2. Open brackets must be closed in the correct order.",
+    "code_solution": "def is_valid(s):\n    stack = []\n    mapping = {\")': \"(\", \"}\": \"{\", \"]\": \"[\"}\n    for char in s:\n        if char in mapping:\n            if not stack or stack[-1] != mapping[char]:\n                return False\n            stack.pop()\n        else:\n            stack.append(char)\n    return len(stack) == 0",
+    "code_explanation": "We use a stack to keep track of opening brackets. When we encounter a closing bracket, we check if it matches the most recent opening bracket (top of the stack). If it doesn't match or if the stack is empty, the string is invalid. At the end, the stack should be empty for a valid string."
+  },
+  {
+    "problem_title": "Reverse String",
+    "problem_description": "Write a function that reverses a string. The input string is given as an array of characters `s`.",
+    "code_solution": "def reverse_string(s):\n    left, right = 0, len(s) - 1\n    while left < right:\n        s[left], s[right] = s[right], s[left]\n        left += 1\n        right -= 1\n    return s",
+    "code_explanation": "This solution uses the two-pointer technique. We start with pointers at the beginning and end of the string, swap the characters, and move the pointers towards the center until they meet."
+  },
+  {
+    "problem_title": "Fibonacci Sequence",
+    "problem_description": "Write a function to generate the nth Fibonacci number.",
+    "code_solution": "def fibonacci(n):\n    if n <= 1:\n        return n\n    a, b = 0, 1\n    for _ in range(2, n + 1):\n        a, b = b, a + b\n    return b",
+    "code_explanation": "This iterative solution keeps track of the last two Fibonacci numbers (a and b) and generates the next one by adding them. It's more efficient than the recursive solution for larger values of n."
+  },
+  {
+    "problem_title": "Palindrome Number",
+    "problem_description": "Determine whether an integer is a palindrome. An integer is a palindrome when it reads the same backward as forward.",
+    "code_solution": "def is_palindrome(x):\n    if x < 0:\n        return False\n    return str(x) == str(x)[::-1]",
+    "code_explanation": "We first check if the number is negative (which can't be a palindrome due to the minus sign). Then we convert the number to a string and compare it with its reverse. The `[::-1]` slice notation reverses the string."
+  },
+  {
+    "problem_title": "Longest Substring Without Repeating Characters",
+    "problem_description": "Given a string `s`, find the length of the longest substring without repeating characters.",
+    "code_solution": "def length_of_longest_substring(s):\n    char_index = {}\n    max_length = start = 0\n    for i, char in enumerate(s):\n        if char in char_index and start <= char_index[char]:\n            start = char_index[char] + 1\n        else:\n            max_length = max(max_length, i - start + 1)\n        char_index[char] = i\n    return max_length",
+    "code_explanation": "We use a sliding window approach with a dictionary to keep track of the last seen position of each character. We update the start of our window when we encounter a repeating character, and update the max_length when we find a longer substring."
+  },
+  {
+    "problem_title": "Binary Search",
+    "problem_description": "Implement binary search to find a target value in a sorted array.",
+    "code_solution": "def binary_search(arr, target):\n    left, right = 0, len(arr) - 1\n    while left <= right:\n        mid = (left + right) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            left = mid + 1\n        else:\n            right = mid - 1\n    return -1",
+    "code_explanation": "Binary search works by repeatedly dividing the search interval in half. We compare the target value to the middle element of the array. If they are not equal, the half in which the target cannot lie is eliminated and the search continues on the remaining half until the value is found or the subarray reduces to zero."
+  },
+  {
+    "problem_title": "Merge Two Sorted Linked Lists",
+    "problem_description": "Merge two sorted linked lists and return it as a new sorted list.",
+    "code_solution": "class ListNode:\n    def __init__(self, val=0, next=None):\n        self.val = val\n        self.next = next\n\ndef merge_two_lists(l1, l2):\n    dummy = ListNode(0)\n    current = dummy\n    while l1 and l2:\n        if l1.val <= l2.val:\n            current.next = l1\n            l1 = l1.next\n        else:\n            current.next = l2\n            l2 = l2.next\n        current = current.next\n    current.next = l1 if l1 else l2\n    return dummy.next",
+    "code_explanation": "We create a dummy node as the start of our result list. We then compare the values of nodes from both lists, always choosing the smaller one to add to our result list. We continue this process until we've exhausted one of the lists, then we append the remaining nodes from the other list."
+  },
+  {
+    "problem_title": "Find the Maximum Element in an Array",
+    "problem_description": "Find the maximum element in an unsorted array.",
+    "code_solution": "def find_max(arr):\n    if not arr:\n        return None\n    max_val = arr[0]\n    for num in arr[1:]:\n        if num > max_val:\n            max_val = num\n    return max_val",
+    "code_explanation": "We initialize our max_val with the first element of the array. Then we iterate through the rest of the array, updating max_val whenever we find a larger element. This ensures we've compared every element in the array exactly once, giving us the maximum value."
+  },
+  {
+    "problem_title": "Reverse a Linked List",
+    "problem_description": "Reverse a singly linked list.",
+    "code_solution": "class ListNode:\n    def __init__(self, val=0, next=None):\n        self.val = val\n        self.next = next\n\ndef reverse_list(head):\n    prev = None\n    current = head\n    while current:\n        next_temp = current.next\n        current.next = prev\n        prev = current\n        current = next_temp\n    return prev",
+    "code_explanation": "We iterate through the list, changing the next pointer of each node to point to its previous element. We use three pointers: one for the current node, one for its previous node, and one for its next node."
+  },
+  {
+    "problem_title": "Implement a Queue using Stacks",
+    "problem_description": "Implement a first in first out (FIFO) queue using only two stacks.",
+    "code_solution": "class MyQueue:\n    def __init__(self):\n        self.stack1 = []\n        self.stack2 = []\n\n    def push(self, x: int) -> None:\n        self.stack1.append(x)\n\n    def pop(self) -> int:\n        self.peek()\n        return self.stack2.pop()\n\n    def peek(self) -> int:\n        if not self.stack2:\n            while self.stack1:\n                self.stack2.append(self.stack1.pop())\n        return self.stack2[-1]\n\n    def empty(self) -> bool:\n        return not self.stack1 and not self.stack2",
+    "code_explanation": "We use two stacks to simulate a queue. When pushing, we always push to stack1. When popping or peeking, we transfer all elements from stack1 to stack2 if stack2 is empty. This reverses the order, allowing us to pop from stack2 in the correct order."
+  },
+  {
+    "problem_title": "Valid Anagram",
+    "problem_description": "Given two strings s and t, return true if t is an anagram of s, and false otherwise.",
+    "code_solution": "from collections import Counter\n\ndef is_anagram(s: str, t: str) -> bool:\n    return Counter(s) == Counter(t)",
+    "code_explanation": "We use Python's Counter class to count the occurrences of each character in both strings. If the counters are equal, the strings are anagrams."
+  },
+  {
+    "problem_title": "Implement Trie (Prefix Tree)",
+    "problem_description": "Implement a trie with insert, search, and startsWith methods.",
+    "code_solution": "class TrieNode:\n    def __init__(self):\n        self.children = {}\n        self.is_end = False\n\nclass Trie:\n    def __init__(self):\n        self.root = TrieNode()\n\n    def insert(self, word: str) -> None:\n        node = self.root\n        for char in word:\n            if char not in node.children:\n                node.children[char] = TrieNode()\n            node = node.children[char]\n        node.is_end = True\n\n    def search(self, word: str) -> bool:\n        node = self.root\n        for char in word:\n            if char not in node.children:\n                return False\n            node = node.children[char]\n        return node.is_end\n\n    def startsWith(self, prefix: str) -> bool:\n        node = self.root\n        for char in prefix:\n            if char not in node.children:\n                return False\n            node = node.children[char]\n        return True",
+    "code_explanation": "A trie is implemented using a tree structure where each node represents a character. The insert method adds a word to the trie, the search method checks if a word exists in the trie, and the startsWith method checks if any word in the trie starts with the given prefix."
+  },
+  {
+    "problem_title": "Merge Intervals",
+    "problem_description": "Given an array of intervals where intervals[i] = [starti, endi], merge all overlapping intervals.",
+    "code_solution": "def merge(intervals):\n    intervals.sort(key=lambda x: x[0])\n    merged = []\n    for interval in intervals:\n        if not merged or merged[-1][1] < interval[0]:\n            merged.append(interval)\n        else:\n            merged[-1][1] = max(merged[-1][1], interval[1])\n    return merged",
+    "code_explanation": "We first sort the intervals based on their start time. Then we iterate through the intervals, merging overlapping ones. If the current interval doesn't overlap with the previous one, we add it to the result. Otherwise, we extend the previous interval."
+  },
+  {
+    "problem_title": "Climbing Stairs",
+    "problem_description": "You are climbing a staircase. It takes n steps to reach the top. Each time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?",
+    "code_solution": "def climb_stairs(n: int) -> int:\n    if n <= 2:\n        return n\n    dp = [0] * (n + 1)\n    dp[1] = 1\n    dp[2] = 2\n    for i in range(3, n + 1):\n        dp[i] = dp[i-1] + dp[i-2]\n    return dp[n]",
+    "code_explanation": "This is a dynamic programming solution. The number of ways to reach the nth step is the sum of the ways to reach the (n-1)th step and the (n-2)th step. We build up the solution iteratively."
+  },
+  {
+    "problem_title": "Implement a Stack using Queues",
+    "problem_description": "Implement a last-in-first-out (LIFO) stack using only two queues.",
+    "code_solution": "from collections import deque\n\nclass MyStack:\n    def __init__(self):\n        self.q1 = deque()\n        self.q2 = deque()\n\n    def push(self, x: int) -> None:\n        self.q2.append(x)\n        while self.q1:\n            self.q2.append(self.q1.popleft())\n        self.q1, self.q2 = self.q2, self.q1\n\n    def pop(self) -> int:\n        return self.q1.popleft()\n\n    def top(self) -> int:\n        return self.q1[0]\n\n    def empty(self) -> bool:\n        return len(self.q1) == 0",
+    "code_explanation": "We use two queues to simulate a stack. When pushing an element, we add it to q2, then move all elements from q1 to q2, and finally swap q1 and q2. This ensures that the most recently added element is always at the front of q1."
+  },
+  {
+    "problem_title": "Implement strStr()",
+    "problem_description": "Return the index of the first occurrence of needle in haystack, or -1 if needle is not part of haystack.",
+    "code_solution": "def strStr(haystack: str, needle: str) -> int:\n    if not needle:\n        return 0\n    for i in range(len(haystack) - len(needle) + 1):\n        if haystack[i:i+len(needle)] == needle:\n            return i\n    return -1",
+    "code_explanation": "We iterate through the haystack string, checking each substring of length equal to the needle. If we find a match, we return the starting index. If we complete the iteration without finding a match, we return -1."
+  },
+  {
+    "problem_title": "Kth Largest Element in an Array",
+    "problem_description": "Find the kth largest element in an unsorted array.",
+    "code_solution": "import heapq\n\ndef findKthLargest(nums: List[int], k: int) -> int:\n    return heapq.nlargest(k, nums)[-1]",
+    "code_explanation": "We use Python's heapq module to efficiently find the k largest elements. The kth largest element will be the last element in this list of k largest elements."
+  },
+  {
+    "problem_title": "Valid Palindrome",
+    "problem_description": "Given a string s, determine if it is a palindrome, considering only alphanumeric characters and ignoring cases.",
+    "code_solution": "def isPalindrome(s: str) -> bool:\n    cleaned = ''.join(c.lower() for c in s if c.isalnum())\n    return cleaned == cleaned[::-1]",
+    "code_explanation": "We first clean the string by removing non-alphanumeric characters and converting to lowercase. Then we compare the cleaned string with its reverse. If they're equal, it's a palindrome."
+  }
+]
